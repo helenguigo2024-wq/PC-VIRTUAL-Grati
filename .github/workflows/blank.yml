@@ -1,0 +1,350 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PC Virtual Extreme 2.0</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;color:white;background:#080b15;overflow:hidden}
+:root{--accent:#745cff}
+.desktop{
+height:100dvh;
+background:
+radial-gradient(ellipse at 75% 30%,#4931a855,transparent 40%),
+radial-gradient(ellipse at 20% 80%,#006b8050,transparent 40%),
+linear-gradient(140deg,#080b17,#111b35);
+position:relative
+}
+.topbar{height:45px;background:#080b16a8;display:flex;justify-content:space-between;align-items:center;padding:0 18px}
+.logo{font-weight:bold;letter-spacing:3px;color:var(--accent)}
+.icons{padding:15px;display:grid;grid-template-columns:80px;gap:12px}
+.desktopIcon{background:transparent;border:0;color:white;font-size:27px;cursor:pointer;padding:9px;border-radius:9px}
+.desktopIcon:hover{background:#ffffff20}
+.desktopIcon small{display:block;font-size:11px;margin-top:6px}
+.taskbar{position:absolute;bottom:0;width:100%;height:58px;background:#090d1beF;backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;gap:12px;border-top:1px solid #ffffff20}
+.taskbar button{background:transparent;color:white;border:0;font-size:24px;cursor:pointer;padding:8px}
+#clock{position:absolute;right:18px;font-size:12px}
+.window{
+display:none;position:absolute;top:50%;left:50%;
+transform:translate(-50%,-50%);
+width:min(750px,94vw);height:min(520px,78dvh);
+background:#101729f5;border:1px solid #ffffff30;
+border-radius:13px;box-shadow:0 20px 80px #000b;
+overflow:hidden;z-index:5
+}
+.windowHeader{height:43px;background:#ffffff12;display:flex;align-items:center;justify-content:space-between;padding:0 12px;cursor:move;font-size:13px;font-weight:bold}
+.close{background:#e84b60;border:0;color:white;border-radius:6px;padding:7px 12px;cursor:pointer}
+.content{padding:18px;height:calc(100% - 43px);overflow:auto}
+.card{background:#ffffff0c;border:1px solid #ffffff17;border-radius:10px;padding:16px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+button{cursor:pointer}
+.action{background:var(--accent);border:0;color:white;padding:11px;border-radius:8px}
+input,textarea,select{background:#080e1d;color:white;border:1px solid #ffffff30;padding:11px;border-radius:7px}
+textarea{width:100%;height:85%;resize:none}
+#startMenu{display:none;position:absolute;bottom:67px;left:50%;transform:translateX(-50%);width:min(360px,90vw);background:#111a2df5;border:1px solid #ffffff30;border-radius:14px;padding:18px;z-index:20}
+#startMenu button{display:block;width:100%;padding:12px;margin-top:7px;text-align:left;background:#ffffff10;border:0;color:white;border-radius:7px}
+.meter{height:8px;background:#ffffff20;border-radius:20px;overflow:hidden;margin:10px 0}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#30d9cb)}
+.terminal{background:#02060d;padding:14px;border-radius:8px;height:85%;font:13px monospace;overflow:auto}
+#terminalInput{width:100%;margin-top:8px}
+.calcGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.calcGrid button{padding:15px;background:#283553;border:0;border-radius:8px;color:white;font-size:17px}
+#browserFrame{width:100%;height:75%;border:1px solid #ffffff30;margin-top:12px}
+small.muted{color:#9daac3}
+@media(max-width:500px){
+.icons{grid-template-columns:70px}
+.window{height:78dvh}
+.taskbar{justify-content:flex-start;padding-left:15px}
+}
+</style>
+</head>
+<body>
+<div class="desktop">
+<header class="topbar">
+<div class="logo">⚡ EXTREME OS</div>
+<div id="topClock">00:00</div>
+</header>
+
+<div class="icons">
+<button class="desktopIcon" onclick="openApp('files')">📁<small>Arquivos</small></button>
+<button class="desktopIcon" onclick="openApp('browser')">🌐<small>Internet</small></button>
+<button class="desktopIcon" onclick="openApp('terminal')">⌨️<small>Terminal</small></button>
+<button class="desktopIcon" onclick="openApp('notes')">📝<small>Notas</small></button>
+<button class="desktopIcon" onclick="openApp('calc')">🧮<small>Calculadora</small></button>
+<button class="desktopIcon" onclick="openApp('performance')">🚀<small>Desempenho</small></button>
+<button class="desktopIcon" onclick="openApp('settings')">⚙️<small>Configurações</small></button>
+</div>
+
+<!-- ARQUIVOS -->
+<div class="window" id="files">
+<div class="windowHeader">📁 Explorador de arquivos<button class="close" onclick="closeApp('files')">✕</button></div>
+<div class="content">
+<h2>Este computador</h2>
+<div class="grid">
+<div class="card">📁 Documentos</div>
+<div class="card">🖼️ Imagens</div>
+<div class="card">🎮 Jogos</div>
+<div class="card">⬇️ Downloads</div>
+<div class="card">🎵 Músicas</div>
+<div class="card">🎬 Vídeos</div>
+</div>
+<p class="muted">Explorador demonstrativo. Não acessa os arquivos reais do dispositivo.</p>
+</div>
+</div>
+
+<!-- NAVEGADOR -->
+<div class="window" id="browser">
+<div class="windowHeader">🌐 Navegador<button class="close" onclick="closeApp('browser')">✕</button></div>
+<div class="content">
+<form onsubmit="navigate(event)">
+<input id="url" style="width:75%" placeholder="Digite um endereço">
+<button class="action">Abrir</button>
+</form>
+<iframe id="browserFrame" title="Navegador" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
+<p class="muted">Alguns sites impedem a abertura dentro de outros sites.</p>
+</div>
+</div>
+
+<!-- TERMINAL -->
+<div class="window" id="terminal">
+<div class="windowHeader">⌨️ Terminal Extreme<button class="close" onclick="closeApp('terminal')">✕</button></div>
+<div class="content">
+<div class="terminal" id="terminalOutput">
+EXTREME OS TERMINAL v2.0<br>
+Digite HELP para ver os comandos.<br><br>
+</div>
+<input id="terminalInput" placeholder="Digite um comando e pressione Enter">
+</div>
+</div>
+
+<!-- NOTAS -->
+<div class="window" id="notes">
+<div class="windowHeader">📝 Bloco de notas<button class="close" onclick="closeApp('notes')">✕</button></div>
+<div class="content">
+<textarea id="noteArea" placeholder="Escreva aqui..."></textarea>
+</div>
+</div>
+
+<!-- CALCULADORA -->
+<div class="window" id="calc">
+<div class="windowHeader">🧮 Calculadora<button class="close" onclick="closeApp('calc')">✕</button></div>
+<div class="content">
+<input id="calcDisplay" readonly value="0" style="width:100%;font-size:25px;text-align:right">
+<div class="calcGrid">
+<button onclick="calculate('7')">7</button><button onclick="calculate('8')">8</button><button onclick="calculate('9')">9</button><button onclick="calculate('/')">÷</button>
+<button onclick="calculate('4')">4</button><button onclick="calculate('5')">5</button><button onclick="calculate('6')">6</button><button onclick="calculate('*')">×</button>
+<button onclick="calculate('1')">1</button><button onclick="calculate('2')">2</button><button onclick="calculate('3')">3</button><button onclick="calculate('-')">−</button>
+<button onclick="calculate('0')">0</button><button onclick="calculate('.')">.</button><button onclick="calculate('C')">C</button><button onclick="calculate('+')">+</button>
+<button style="grid-column:span 4" onclick="calculate('=')">=</button>
+</div>
+</div>
+</div>
+
+<!-- DESEMPENHO -->
+<div class="window" id="performance">
+<div class="windowHeader">🚀 Central Extreme<button class="close" onclick="closeApp('performance')">✕</button></div>
+<div class="content">
+<h2>Desempenho do sistema</h2>
+<div class="card">CPU <b>Perfil Ultra</b><div class="meter"><i style="width:100%"></i></div></div>
+<div class="card">RAM <b>16 GB simulados</b><div class="meter"><i style="width:90%"></i></div></div>
+<div class="card">GPU <b>Modo extremo</b><div class="meter"><i style="width:100%"></i></div></div>
+<div class="card">SSD <b>Armazenamento virtual</b><div class="meter"><i style="width:95%"></i></div></div>
+<p class="muted">Indicadores ilustrativos, não representam as peças reais do aparelho.</p>
+</div>
+</div>
+
+<!-- CONFIGURAÇÕES -->
+<div class="window" id="settings">
+<div class="windowHeader">⚙️ Configurações<button class="close" onclick="closeApp('settings')">✕</button></div>
+<div class="content">
+<h2>Personalização</h2>
+<div class="card">
+<label>Cor do sistema</label><br><br>
+<input type="color" id="colorPicker" value="#745cff">
+</div>
+<div class="card">
+<label>Brilho</label><br><br>
+<input type="range" id="brightness" min="70" max="120" value="100">
+</div>
+<div class="card">
+<button class="action" onclick="toggleFullscreen()">Tela cheia</button>
+</div>
+</div>
+</div>
+
+<!-- MENU INICIAR -->
+<div id="startMenu">
+<h2>⚡ EXTREME OS</h2>
+<input id="search" placeholder="Pesquisar aplicativo" style="width:100%">
+<button onclick="openApp('files')">📁 Arquivos</button>
+<button onclick="openApp('browser')">🌐 Internet</button>
+<button onclick="openApp('terminal')">⌨️ Terminal</button>
+<button onclick="openApp('notes')">📝 Notas</button>
+<button onclick="openApp('calc')">🧮 Calculadora</button>
+<button onclick="openApp('performance')">🚀 Desempenho</button>
+<button onclick="openApp('settings')">⚙️ Configurações</button>
+</div>
+
+<footer class="taskbar">
+<button onclick="toggleStart()">⊞</button>
+<button onclick="openApp('files')">📁</button>
+<button onclick="openApp('browser')">🌐</button>
+<button onclick="openApp('terminal')">⌨️</button>
+<button onclick="openApp('settings')">⚙️</button>
+<span id="clock">00:00</span>
+</footer>
+</div>
+
+<script>
+const appNames=['files','browser','terminal','notes','calc','performance','settings'];
+
+function openApp(id){
+appNames.forEach(a=>document.getElementById(a).style.display='none');
+document.getElementById(id).style.display='block';
+document.getElementById('startMenu').style.display='none';
+}
+function closeApp(id){
+document.getElementById(id).style.display='none';
+}
+function toggleStart(){
+const menu=document.getElementById('startMenu');
+menu.style.display=menu.style.display==='block'?'none':'block';
+}
+
+function updateClock(){
+const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+document.getElementById('clock').textContent=t;
+document.getElementById('topClock').textContent=t;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// Bloco de notas
+const noteArea=document.getElementById('noteArea');
+noteArea.value=localStorage.getItem('extremeNotes')||'';
+noteArea.addEventListener('input',()=>{
+localStorage.setItem('extremeNotes',noteArea.value);
+});
+
+// Calculadora
+let expression='';
+function calculate(v){
+const display=document.getElementById('calcDisplay');
+if(v==='C')expression='';
+else if(v==='='){
+try{
+if(!/^[0-9+\-*/(). ]+$/.test(expression))throw Error();
+const result=Function('"use strict";return ('+expression+')')();
+if(!Number.isFinite(result))throw Error();
+expression=String(result);
+}catch{expression='Erro';}
+}else{
+if(expression==='Erro')expression='';
+expression+=v;
+}
+display.value=expression||'0';
+}
+
+// Navegador
+function navigate(e){
+e.preventDefault();
+let address=document.getElementById('url').value.trim();
+if(!address)return;
+if(!address.includes('.')&&!address.startsWith('http')){
+address='https://www.google.com/search?q='+encodeURIComponent(address);
+}else if(!address.startsWith('http')){
+address='https://'+address;
+}
+document.getElementById('browserFrame').src=address;
+}
+
+// Personalização
+document.getElementById('colorPicker').addEventListener('input',e=>{
+document.documentElement.style.setProperty('--accent',e.target.value);
+localStorage.setItem('extremeColor',e.target.value);
+});
+const savedColor=localStorage.getItem('extremeColor');
+if(savedColor){
+document.documentElement.style.setProperty('--accent',savedColor);
+document.getElementById('colorPicker').value=savedColor;
+}
+
+document.getElementById('brightness').addEventListener('input',e=>{
+document.querySelector('.desktop').style.filter=`brightness(${e.target.value}%)`;
+});
+
+function toggleFullscreen(){
+if(!document.fullscreenElement){
+document.documentElement.requestFullscreen?.();
+}else{
+document.exitFullscreen?.();
+}
+}
+
+// Terminal demonstrativo
+const terminalInput=document.getElementById('terminalInput');
+const terminalOutput=document.getElementById('terminalOutput');
+
+terminalInput.addEventListener('keydown',e=>{
+if(e.key!=='Enter')return;
+const cmd=terminalInput.value.trim().toLowerCase();
+terminalInput.value='';
+terminalOutput.innerHTML+='&gt; '+escapeHTML(cmd)+'<br>';
+
+const commands={
+help:'Comandos: help, date, time, about, clear, apps, whoami',
+about:'EXTREME OS 2.0 - Sistema operacional simulado no navegador.',
+whoami:'Usuário: visitante',
+apps:'Aplicativos: arquivos, navegador, notas, calculadora, desempenho e configurações.',
+date:new Date().toLocaleDateString('pt-BR'),
+time:new Date().toLocaleTimeString('pt-BR')
+};
+
+if(cmd==='clear'){
+terminalOutput.innerHTML='';
+}else{
+terminalOutput.innerHTML+=(commands[cmd]||'Comando não encontrado. Digite HELP.')+'<br>';
+}
+terminalOutput.scrollTop=terminalOutput.scrollHeight;
+});
+
+function escapeHTML(s){
+return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Pesquisa do menu
+document.getElementById('search').addEventListener('input',e=>{
+const q=e.target.value.toLowerCase();
+document.querySelectorAll('#startMenu button').forEach(b=>{
+b.style.display=b.textContent.toLowerCase().includes(q)?'block':'none';
+});
+});
+
+// Janelas arrastáveis
+document.querySelectorAll('.window').forEach(win=>{
+const header=win.querySelector('.windowHeader');
+let dragging=false,dx=0,dy=0;
+header.addEventListener('pointerdown',e=>{
+if(e.target.closest('button'))return;
+dragging=true;
+const r=win.getBoundingClientRect();
+win.style.transform='none';
+win.style.left=r.left+'px';
+win.style.top=r.top+'px';
+dx=e.clientX-r.left;
+dy=e.clientY-r.top;
+header.setPointerCapture(e.pointerId);
+});
+header.addEventListener('pointermove',e=>{
+if(!dragging)return;
+win.style.left=Math.max(0,Math.min(innerWidth-win.offsetWidth,e.clientX-dx))+'px';
+win.style.top=Math.max(0,Math.min(innerHeight-win.offsetHeight,e.clientY-dy))+'px';
+});
+header.addEventListener('pointerup',()=>dragging=false);
+header.addEventListener('pointercancel',()=>dragging=false);
+});
+</script>
+</body>
+</html>
